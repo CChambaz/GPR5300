@@ -29,7 +29,7 @@ void main()
 	color *= sin(clamp(vertexPos.y, 0.1, 1.0));
 	FragColor = color;
 
-	vec3 normal = normalize(cross(dFdx(vertexPos), dFdy(vertexPos)));
+	/*vec3 normal = normalize(cross(dFdx(vertexPos), dFdy(vertexPos)));
 
 	float refractiveFactor = GetFresnelDelta(normal, normalize(vertexPos.xyz - viewPos), indecesOfRefractionRatio);
 	vec2 ndc = (FragPos.xy/FragPos.w)/2.0 + 0.5;
@@ -39,12 +39,12 @@ void main()
 	ndc += depthAttenuation * waveStrength;
 	ndc = clamp(ndc, 0.001, 0.999);*/
 
-	vec4 reflectionColor = texture(reflectionMap, vec2(1.0-ndc.x, ndc.y));
+	/*vec4 reflectionColor = texture(reflectionMap, vec2(1.0-ndc.x, ndc.y));
 
 	vec4 refractionColor = texture(refractionMap, ndc);
 
 	vec4 mixedColor = mix(reflectionColor, refractionColor, refractiveFactor);
 
-	FragColor *= mixedColor;
+	FragColor *= mixedColor;*/
 }
 

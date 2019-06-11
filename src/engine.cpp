@@ -354,6 +354,11 @@ void Engine::AddDrawingProgram(DrawingProgram* drawingProgram)
 	drawingPrograms.push_back(drawingProgram);
 }
 
+SDL_Window* Engine::GetWindow()
+{
+	return window;
+}
+
 Engine* Engine::GetPtr()
 {
 	return enginePtr;

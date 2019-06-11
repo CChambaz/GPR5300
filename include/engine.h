@@ -56,7 +56,7 @@ public:
 	Camera& GetCamera();
 	void AddDrawingProgram(DrawingProgram* drawingProgram);
 	std::vector<DrawingProgram*>& GetDrawingPrograms() { return drawingPrograms; };
-
+	SDL_Window* GetWindow();
 
 	static Engine* GetPtr();
 private:

@@ -230,13 +230,13 @@ void WaterSceneDrawingProgram::Draw()
 	auto& config = engine->GetConfiguration();
 	Skybox& skybox = scene->GetSkybox();
 
-	if (noPerturbationSince >= perturbationCoolDown)
+	/*if (noPerturbationSince >= perturbationCoolDown)
 	{
 		PerturbateGrid();
 		noPerturbationSince = 0.0f;
 	}
 	else
-		noPerturbationSince += engine->GetDeltaTime();
+		noPerturbationSince += engine->GetDeltaTime();*/
 
 	if (drawTime >= waterHeightRefreshOffset)
 	{
@@ -584,9 +584,11 @@ void WaterSceneDrawingProgram::UpdateGridHeights()
 		previousWaterGrid[x] = currentWaterGrid[x];
 
 	// Reset buffer data (maybe move this part in the draw function)
+
 	glBindBuffer(GL_ARRAY_BUFFER, waterVBO);
 	glBufferData(GL_ARRAY_BUFFER, currentWaterGrid.size() * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
 	glBufferData(GL_ARRAY_BUFFER, currentWaterGrid.size() * sizeof(glm::vec3), &currentWaterGrid[0], GL_STREAM_DRAW);
+
 	//glBufferSubData(GL_ARRAY_BUFFER, 0, currentWaterGrid.size() * sizeof(glm::vec3), &currentWaterGrid[0]);
 	//glNamedBufferSubData(waterVBO, 0, currentWaterGrid.size() * sizeof(glm::vec3), &currentWaterGrid[0]);
 }
@@ -676,23 +678,24 @@ void SceneDrawingProgram::Draw()
 	ProcessInput();
 
 	modelShader.Bind();
-	projection = glm::perspective(glm::radians(camera.Zoom), (float)config.screenWidth / (float)config.screenHeight, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(camera.Zoom), (float)config.screenWidth / (float)config.screenHeight, 0.1f, 10000.0f);
 	modelShader.SetMat4("projection", projection);
 	modelShader.SetMat4("view", camera.GetViewMatrix());
-	for(auto i = 0l; i < modelNmb;i++)
+	/*for(auto i = 0l; i < modelNmb;i++)
 	{
 		glm::mat4 modelMatrix(1.0f);
 		modelMatrix = glm::translate(modelMatrix, positions[i]);
 		modelMatrix = glm::scale(modelMatrix, scales[i]);
-		auto quaternion = glm::quat(rotations[i]);
-		modelMatrix = glm::mat4_cast(quaternion)*modelMatrix;
-		modelShader.SetMat4("model", modelMatrix);
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(rotations[i].x), glm::vec3(1, 0, 0));
+		/*auto quaternion = glm::quat(glm::radians(rotations[i]));
+		modelMatrix = glm::mat4_cast(quaternion)*modelMatrix;*/
+		/*modelShader.SetMat4("model", modelMatrix);
 		models[i]->Draw(modelShader);
-	}
+	}*/
 	auto view = camera.GetViewMatrix();
 	skybox.SetViewMatrix(view);
 	skybox.SetProjectionMatrix(projection);
-	skybox.Draw();
+	//skybox.Draw();
 }
 
 void SceneDrawingProgram::Destroy()

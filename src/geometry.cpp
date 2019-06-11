@@ -2,6 +2,7 @@
 #include <graphics.h>
 #include <geometry.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 void Plane::Init()
 {
@@ -43,7 +44,6 @@ void Plane::Init()
 	glm::vec3 tangent2 = glm::normalize((edge1 * deltaUV2.y - edge2 * deltaUV1.y) * f);
 	glm::vec3 bitangent2 = glm::normalize((-deltaUV2.x * edge1 + deltaUV1.x * edge2) * f);
 
-
 	vertices = {
 		// positions            // normal         // texcoords  // tangent                          // bitangent
 		pos1.x, pos1.y, pos1.z, nm.x, nm.y, nm.z, uv1.x, uv1.y, tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
@@ -60,7 +60,7 @@ void Plane::Init()
 	glBindVertexArray(quadVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertices.size(), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
@@ -329,11 +329,11 @@ void Grid::Init(int size)
 		{
 			int offset = x * size + z;
 			indices[index] = (short)(offset + 0);
-			indices[index + 1] = (short)(offset + 1);
-			indices[index + 2] = (short)(offset + size);
+			indices[index + 1] = (short)(offset + size);
+			indices[index + 2] = (short)(offset + 1);
 			indices[index + 3] = (short)(offset + 1);
-			indices[index + 4] = (short)(offset + size + 1);
-			indices[index + 5] = (short)(offset + size);
+			indices[index + 4] = (short)(offset + size);
+			indices[index + 5] = (short)(offset + size + 1);
 			index += 6;
 		}
 	}
@@ -344,7 +344,7 @@ void Grid::Init(int size)
 	glBindVertexArray(gridVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gridEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(short), &indices[0], GL_STATIC_DRAW);
