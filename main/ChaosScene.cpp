@@ -54,7 +54,7 @@ private:
 	Plane buildingPlane;
 	float buildingPosition[3] = { 0,0,0 };
 	float buildingSize[3] = { 1,1,1 };
-	int buildingDimension[3] = { 10,5,18 };
+	int buildingDimension[3] = { 10,7,18 };
 	Shader buildingShader;
 	unsigned int buildingWallTexture;
 	unsigned int buildingFloorTexture;	
