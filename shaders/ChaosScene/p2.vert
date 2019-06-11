@@ -37,11 +37,7 @@ void main()
 
 	// Circle function
 	float y = clamp(actualAngle * sinus, 0.1, height);
-	//float y = (aPos.x * actualAngle) * timeSinceStart;//asin(aPos.x / aPos.z * sinus);
-	//float y = timeSinceStart * pow(speed, actualAngle);
-	//float y = aPos.x * actualAngle * timeSinceStart;
-	//float y = speed * sin(timeSinceStart) * tan(actualAngle);
-	vertexPos = vec4(aPos.x, y, aPos.z, 1.0).xyz; // 5;
+	vertexPos = vec4(aPos.x, y, aPos.z, 1.0).xyz;
 	FragPos = projection * view * model * vec4(aPos.x, y, aPos.z, 1.0);
 	gl_Position = FragPos;
 }  

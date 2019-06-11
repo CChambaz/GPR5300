@@ -30,19 +30,12 @@ void main()
 	// Define the actual angle
 	float actualAngle = atan(distanceToCenter / distance(center, horizontal));
 
-	//float amplitude = clamp(tan(angle) / (tan(actualAngle)), 0.1, 1);
 	float amplitude = clamp((cos(actualAngle) * sin(actualAngle)) / (cos(angle) * sin(angle)), 0.1, 1);
 
 	// Sinus function
 	float sinus = amplitude * sin(speed * actualAngle * timeSinceStart) + distanceToCenter;
 
-	// Circle function
-	//float y = (height * amplitude) / distanceToCenter;//clamp(distanceToCenter * sin(actualAngle), 0.1, height);
 	float y = clamp(angle * sin(sinus), 0.1, height);
-	//float y = (aPos.x * actualAngle) * timeSinceStart;//asin(aPos.x / aPos.z * sinus);
-	//float y = timeSinceStart * pow(speed, actualAngle);
-	//float y = aPos.x * actualAngle * timeSinceStart;
-	//float y = speed * sin(timeSinceStart) * tan(actualAngle);
 	vertexPos = vec4(aPos.x, y, aPos.z, 1.0).xyz;
 	FragPos = projection * view * model * vec4(aPos.x, y, aPos.z, 1.0);
 	gl_Position = FragPos;

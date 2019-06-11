@@ -28,15 +28,6 @@ struct buildingElement {
 	float sphereRadius;
 };
 
-struct paintingElement {
-	Grid* grid;
-	glm::mat4 modelMatrix;
-	unsigned int texture;
-	Shader* shader;
-	float topRight[3];
-	float bottomLeft[3];
-};
-
 struct frustum {
 	glm::vec4 plansNormals[6];
 };
@@ -58,56 +49,58 @@ private:
 	float fov = 45.0f;
 	frustum mainCameraFrustum;
 
-	std::vector<buildingElement> building;
-
-	std::vector<glm::vec3> paintingSlotPosition;
-	float paintingYPos = 5.0f;
-
 	// Building parts
+	std::vector<buildingElement> building;
 	Plane buildingPlane;
 	float buildingPosition[3] = { 0,0,0 };
 	float buildingSize[3] = { 1,1,1 };
-	int buildingDimension[3] = { 5,5,20 };
+	int buildingDimension[3] = { 10,5,18 };
 	Shader buildingShader;
 	unsigned int buildingWallTexture;
-	unsigned int buildingFloorTexture;
+	unsigned int buildingFloorTexture;	
 
-	Skybox skybox;
-
+	// Painting part
 	Grid gridPainting;
 	int gridPaintingSize = 250;
 	glm::vec3 gridPaintingScale = glm::vec3(0.009375f, 0.009375f, 0.009375f);
 	float paintingSize = sqrt(2 * (gridPaintingSize * gridPaintingSize)) / gridPaintingScale[0];
+	std::vector<glm::vec3> paintingSlotPosition;
+	float paintingYPos = 5.0f;
 
-	// left attributs
-	Shader leftShader;
-	float leftSpeed = 7.0f;
-	float leftAmount = 10.0f;
-	float leftHeight = 0.4f;
-	float leftPosition[3] = { (float)(-gridPaintingSize / 2),0,(float)(-gridPaintingSize / 2) };
-	float leftScale[3] = { 1,1,1 };
-	float leftColor[3] = { 0.62,0.37,0.62 };
+	// Painting 1 attributs
+	Shader painting1Shader;
+	float painting1Speed = 7.0f;
+	float painting1Amount = 10.0f;
+	float painting1Height = 0.4f;
+	float painting1Color[3] = { 0.62,0.37,0.62 };
 
-	// Walls attributs
-	Shader wallShader;
-	float wallSpeed = 2.905f;
-	float wallAmount = 21.351f;
-	float wallHeight = 0.6f;
-	float wallColor[3] = { 0.62,0.37,0.62 };
-	float wallPositionYOffset = 2;
-	float wallTime = 20.27f;
+	// Painting 2 attributs
+	Shader painting2Shader;
+	float painting2Speed = 2.905f;
+	float painting2Amount = 21.351f;
+	float painting2Height = 0.6f;
+	float painting2Angle = 0.5f;
+	float painting2Color[3] = { 0.62,0.37,0.62 };
+	float painting2Time = 20.27f;
 
-	// Top attributs
-	Shader topShader;
-	float topCenter[2] = { (float)(gridPaintingSize / 2), (float)(gridPaintingSize / 2) };
-	float topAngle = 0.5f;
-	float topHeight = 5.0f;
-	float topSpeed = 2.0f;
-	float topColor[3] = { 0.62,0.37,0.62 };
-	float topPositionYOffset = 5;
+	// Painting 3 attributs
+	Shader painting3Shader;
+	float painting3Center[2] = { (float)(gridPaintingSize / 2), (float)(gridPaintingSize / 2) };
+	float painting3Angle = 0.5f;
+	float painting3Height = 5.0f;
+	float painting3Speed = 2.0f;
+	float painting3Color[3] = { 0.62,0.37,0.62 };
+
+	// Painting 4 attributs
+	Shader painting4Shader;
+	float painting4Height = 0.912f;
+	float painting4Color[3] = { 0.62,0.37,0.62 };
+	float painting4Amount = 3.142f;
 
 	// Camera attribut
 	float cameraPosition[3] = { 2.25f,4,7.5f };
+
+	Skybox skybox;
 
 	bool debugMod = false;
 };
@@ -134,23 +127,29 @@ void ChaosSceneDrawingProgram::Init()
 		"shaders/ChaosScene/building.frag");
 	shaders.push_back(&buildingShader);
 
-	leftShader.CompileSource(
-		"shaders/ChaosScene/floor.vert",
-		"shaders/ChaosScene/floor.frag"
+	painting1Shader.CompileSource(
+		"shaders/ChaosScene/p1.vert",
+		"shaders/ChaosScene/painting.frag"
 	);
-	shaders.push_back(&leftShader);
+	shaders.push_back(&painting1Shader);
 
-	wallShader.CompileSource(
-		"shaders/ChaosScene/wall.vert",
-		"shaders/ChaosScene/wall.frag"
+	painting2Shader.CompileSource(
+		"shaders/ChaosScene/p2.vert",
+		"shaders/ChaosScene/painting.frag"
 	);
-	shaders.push_back(&wallShader);
+	shaders.push_back(&painting2Shader);
 
-	topShader.CompileSource(
-		"shaders/ChaosScene/top.vert",
-		"shaders/ChaosScene/top.frag"
+	painting3Shader.CompileSource(
+		"shaders/ChaosScene/p3.vert",
+		"shaders/ChaosScene/painting.frag"
 	);
-	shaders.push_back(&topShader);
+	shaders.push_back(&painting3Shader);
+
+	painting4Shader.CompileSource(
+		"shaders/ChaosScene/p4.vert",
+		"shaders/ChaosScene/painting.frag"
+	);
+	shaders.push_back(&painting4Shader);
 
 	camera.Position.x = cameraPosition[0];
 	camera.Position.y = cameraPosition[1];
@@ -338,12 +337,12 @@ void ChaosSceneDrawingProgram::Init()
 	};
 
 	skybox.Init(faces);
+
+	std::cout << paintingSlotPosition.size();
 }
 
 void ChaosSceneDrawingProgram::Draw()
 {
-	/*rmt_ScopedOpenGLSample(DrawWater);
-	rmt_ScopedCPUSample(DrawWaterCPU, 0);*/
 	Engine* engine = Engine::GetPtr();
 	auto& config = engine->GetConfiguration();
 	Camera& camera = engine->GetCamera();
@@ -388,25 +387,25 @@ void ChaosSceneDrawingProgram::Draw()
 	int paintingPosIndex = 0;
 
 	glEnable(GL_DEPTH_TEST);
-	// left rendering
+	// Painting 1 rendering
 	if(CheckFrustum(paintingSlotPosition[paintingPosIndex], paintingSize))
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		leftShader.Bind();
+		painting1Shader.Bind();
 		modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::translate(modelMatrix, paintingSlotPosition[paintingPosIndex]);
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
 		modelMatrix = glm::scale(modelMatrix, gridPaintingScale);
 
-		leftShader.SetMat4("model", modelMatrix);
-		leftShader.SetMat4("projection", projection);
-		leftShader.SetMat4("view", camera.GetViewMatrix());
-		leftShader.SetVec3("vertexColor", leftColor);
-		leftShader.SetFloat("speed", leftSpeed);
-		leftShader.SetFloat("amount", leftAmount);
-		leftShader.SetFloat("height", leftHeight);
-		leftShader.SetFloat("timeSinceStart", engine->GetTimeSinceInit());
+		painting1Shader.SetMat4("model", modelMatrix);
+		painting1Shader.SetMat4("projection", projection);
+		painting1Shader.SetMat4("view", camera.GetViewMatrix());
+		painting1Shader.SetVec3("vertexColor", painting1Color);
+		painting1Shader.SetFloat("speed", painting1Speed);
+		painting1Shader.SetFloat("amount", painting1Amount);
+		painting1Shader.SetFloat("height", painting1Height);
+		painting1Shader.SetFloat("timeSinceStart", engine->GetTimeSinceInit());
 
 		gridPainting.Draw();
 		
@@ -414,55 +413,83 @@ void ChaosSceneDrawingProgram::Draw()
 
 	paintingPosIndex++;
 
-	// right rendering
+	// Painting 2 rendering
 	if (CheckFrustum(paintingSlotPosition[paintingPosIndex], paintingSize))
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		wallShader.Bind();
+		painting2Shader.Bind();
 		modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::translate(modelMatrix, paintingSlotPosition[paintingPosIndex]);
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
 		modelMatrix = glm::scale(modelMatrix, gridPaintingScale);
 
-		wallShader.SetMat4("model", modelMatrix);
-		wallShader.SetMat4("projection", projection);
-		wallShader.SetMat4("view", camera.GetViewMatrix());
-		wallShader.SetVec3("vertexColor", wallColor);
-		topShader.SetVec2("center", topCenter[0], topCenter[1]);
-		wallShader.SetFloat("speed", wallSpeed);
-		wallShader.SetFloat("amount", wallAmount);
-		wallShader.SetFloat("height", wallHeight);
-		wallShader.SetFloat("timeSinceStart", wallTime);
+		painting2Shader.SetMat4("model", modelMatrix);
+		painting2Shader.SetMat4("projection", projection);
+		painting2Shader.SetMat4("view", camera.GetViewMatrix());
+		painting2Shader.SetVec3("vertexColor", painting2Color);
+		painting2Shader.SetVec2("center", painting3Center[0], painting3Center[1]);
+		painting2Shader.SetFloat("angle", painting2Angle);
+		painting2Shader.SetFloat("speed", painting2Speed);
+		painting2Shader.SetFloat("amount", painting2Amount);
+		painting2Shader.SetFloat("height", painting2Height);
+		painting2Shader.SetFloat("timeSinceStart", painting2Time);
 
 		gridPainting.Draw();
 	}
 
 	paintingPosIndex++;
 
-	// Top rendering
+	// Painting 3 rendering
 	if (CheckFrustum(paintingSlotPosition[paintingPosIndex], paintingSize))
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		topShader.Bind();
+		painting3Shader.Bind();
 		modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::translate(modelMatrix, paintingSlotPosition[paintingPosIndex]);
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
 		modelMatrix = glm::scale(modelMatrix, gridPaintingScale);
 
-		topShader.SetMat4("model", modelMatrix);
-		topShader.SetMat4("projection", projection);
-		topShader.SetMat4("view", camera.GetViewMatrix());
-		topShader.SetVec3("viewPos", camera.Position);
-		topShader.SetVec3("vertexColor", topColor);
+		painting3Shader.SetMat4("model", modelMatrix);
+		painting3Shader.SetMat4("projection", projection);
+		painting3Shader.SetMat4("view", camera.GetViewMatrix());
+		painting3Shader.SetVec3("viewPos", camera.Position);
+		painting3Shader.SetVec3("vertexColor", painting3Color);
 		
-		topShader.SetVec2("center", topCenter[0], topCenter[1]);
-		topShader.SetFloat("angle", topAngle);
-		topShader.SetFloat("speed", topSpeed);
-		topShader.SetFloat("height", topHeight);
+		painting3Shader.SetVec2("center", painting3Center[0], painting3Center[1]);
+		painting3Shader.SetFloat("angle", painting3Angle);
+		painting3Shader.SetFloat("speed", painting3Speed);
+		painting3Shader.SetFloat("height", painting3Height);
 
-		topShader.SetFloat("timeSinceStart", engine->GetTimeSinceInit());
+		painting3Shader.SetFloat("timeSinceStart", engine->GetTimeSinceInit());
+
+		gridPainting.Draw();
+	}
+
+	paintingPosIndex++;
+
+	// Painting 4 rendering
+	if (CheckFrustum(paintingSlotPosition[paintingPosIndex], paintingSize))
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		painting4Shader.Bind();
+		modelMatrix = glm::mat4(1.0f);
+		modelMatrix = glm::translate(modelMatrix, paintingSlotPosition[paintingPosIndex]);
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
+		modelMatrix = glm::scale(modelMatrix, gridPaintingScale);
+
+		painting4Shader.SetMat4("model", modelMatrix);
+		painting4Shader.SetMat4("projection", projection);
+		painting4Shader.SetMat4("view", camera.GetViewMatrix());
+		painting4Shader.SetVec3("viewPos", camera.Position);
+		painting4Shader.SetVec3("vertexColor", painting4Color);
+
+		painting4Shader.SetFloat("height", painting4Height);
+		painting4Shader.SetFloat("amount", painting4Amount);
+
+		painting4Shader.SetFloat("timeSinceStart", engine->GetTimeSinceInit());
 
 		gridPainting.Draw();
 	}
@@ -601,7 +628,6 @@ void ChaosSceneDrawingProgram::UpdateUi()
 	ImGui::SliderFloat("Camera far", &far, 15.0f, 1000.0f);
 	ImGui::SliderFloat("Camera near", &near, 0.0f, 15.0f);
 	ImGui::SliderFloat("Camera fov", &fov, 0.0f, 120.0f);
-	ImGui::SliderFloat("Wall time", &wallTime, 0.0f, 120.0f);
 }
 
 void ChaosSceneDrawingProgram::ProcessInput()
