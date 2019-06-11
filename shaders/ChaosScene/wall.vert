@@ -18,7 +18,7 @@ uniform float timeSinceStart;
 void main()
 { 
 	// Horizontal vector of the current circle
-	/*vec2 horizontal;
+	vec2 horizontal;
 	horizontal.x = center.x + length(aPos.xz);
 	horizontal.y = center.y;
 
@@ -40,8 +40,8 @@ void main()
 	//float y = (aPos.x * actualAngle) * timeSinceStart;//asin(aPos.x / aPos.z * sinus);
 	//float y = timeSinceStart * pow(speed, actualAngle);
 	//float y = aPos.x * actualAngle * timeSinceStart;
-	//float y = speed * sin(timeSinceStart) * tan(actualAngle);*/
-	vertexPos = vec4(aPos.x, aPos.y, aPos.z, 1.0).xyz * 5;
-	FragPos = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	//float y = speed * sin(timeSinceStart) * tan(actualAngle);
+	vertexPos = vec4(aPos.x, y, aPos.z, 1.0).xyz; // 5;
+	FragPos = projection * view * model * vec4(aPos.x, y, aPos.z, 1.0);
 	gl_Position = FragPos;
 }  

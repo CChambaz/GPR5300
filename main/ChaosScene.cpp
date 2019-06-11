@@ -59,13 +59,15 @@ private:
 	frustum mainCameraFrustum;
 
 	std::vector<buildingElement> building;
-	std::vector<paintingElement> painting;
 
-	//Grid buildingPlane;
+	std::vector<glm::vec3> paintingSlotPosition;
+	float paintingYPos = 5.0f;
+
+	// Building parts
 	Plane buildingPlane;
 	float buildingPosition[3] = { 0,0,0 };
 	float buildingSize[3] = { 1,1,1 };
-	int buildingDimension[3] = { 50,5,20 };
+	int buildingDimension[3] = { 5,5,20 };
 	Shader buildingShader;
 	unsigned int buildingWallTexture;
 	unsigned int buildingFloorTexture;
@@ -73,7 +75,9 @@ private:
 	Skybox skybox;
 
 	Grid gridPainting;
-	int gridPaintingSize = 25;
+	int gridPaintingSize = 250;
+	glm::vec3 gridPaintingScale = glm::vec3(0.009375f, 0.009375f, 0.009375f);
+	float paintingSize = sqrt(2 * (gridPaintingSize * gridPaintingSize)) / gridPaintingScale[0];
 
 	// left attributs
 	Shader leftShader;
@@ -91,6 +95,7 @@ private:
 	float wallHeight = 0.6f;
 	float wallColor[3] = { 0.62,0.37,0.62 };
 	float wallPositionYOffset = 2;
+	float wallTime = 20.27f;
 
 	// Top attributs
 	Shader topShader;
@@ -102,9 +107,9 @@ private:
 	float topPositionYOffset = 5;
 
 	// Camera attribut
-	float cameraPosition[3] = { 0,(float)(gridPaintingSize / 2),(float)-(gridPaintingSize / 2) };
+	float cameraPosition[3] = { 2.25f,4,7.5f };
 
-	bool debugMod = true;
+	bool debugMod = false;
 };
 
 void ChaosSceneDrawingProgram::Init()
@@ -166,19 +171,15 @@ void ChaosSceneDrawingProgram::Init()
 
 			element.plane = &buildingPlane;
 
-			float positionX = buildingPosition[0] + (x * buildingSize[0]);
-			float positionY = buildingPosition[1];
-			float positionZ = buildingPosition[2] + (z * buildingSize[2]);
-
 			glm::vec4 position = {
-				positionX,
-				positionY,
-				positionZ,
+				buildingPosition[0] + (x * buildingSize[0]),
+				buildingPosition[1],
+				buildingPosition[2] + (z * buildingSize[2]),
 				1.0f
 			};
 
 			element.modelMatrix = glm::mat4(1.0f);
-			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(positionX, positionY, positionZ));
+			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(position.x, position.y, position.z));
 			element.modelMatrix = glm::rotate(element.modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
 			element.modelMatrix = glm::scale(element.modelMatrix, glm::vec3(buildingSize[0], buildingSize[1], buildingSize[2]));
 
@@ -203,19 +204,15 @@ void ChaosSceneDrawingProgram::Init()
 
 			element.plane = &buildingPlane;
 
-			float positionX = buildingPosition[0] - buildingSize[0];
-			float positionY = buildingPosition[1];
-			float positionZ = buildingPosition[2] + (z * buildingSize[2]);
-
 			glm::vec4 position = {
-				positionX,
-				positionY,
-				positionZ,
+				buildingPosition[0] - buildingSize[0],
+				buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1],
+				buildingPosition[2] + (z * buildingSize[2]),
 				1.0f
 			};
 
 			element.modelMatrix = glm::mat4(1.0f);
-			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(buildingPosition[0] - buildingSize[0], buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1], buildingPosition[2] + (z * buildingSize[2])));
+			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(position.x, position.y, position.z));
 			element.modelMatrix = glm::rotate(element.modelMatrix, glm::radians(90.0f), glm::vec3(0, 1, 0));
 			element.modelMatrix = glm::scale(element.modelMatrix, glm::vec3(buildingSize[0], buildingSize[1], buildingSize[2]));
 			
@@ -224,6 +221,9 @@ void ChaosSceneDrawingProgram::Init()
 			element.sphereRadius = sqrt(buildingSize[0] * buildingSize[0] + buildingSize[1] * buildingSize[1]) * 30;
 
 			building.push_back(element);
+
+			if (z % 5 == 0)
+				paintingSlotPosition.push_back(glm::vec3(position.x, paintingYPos, position.z));
 		}
 	}
 
@@ -240,19 +240,15 @@ void ChaosSceneDrawingProgram::Init()
 
 			element.plane = &buildingPlane;
 
-			float positionX = buildingPosition[0] + buildingSize[0] * buildingDimension[0];
-			float positionY = buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1];
-			float positionZ = buildingPosition[2] + (z * buildingSize[2]);
-
 			glm::vec4 position = {
-				positionX,
-				positionY,
-				positionZ,
+				buildingPosition[0] + buildingSize[0] * buildingDimension[0],
+				buildingPosition[1] + (y* buildingSize[1]) + buildingSize[1],
+				buildingPosition[2] + (z* buildingSize[2]),
 				1.0f
 			};
 
 			element.modelMatrix = glm::mat4(1.0f);
-			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(buildingPosition[0] + buildingSize[0] * buildingDimension[0], buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1], buildingPosition[2] + (z * buildingSize[2])));
+			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(position.x, position.y, position.z));
 			element.modelMatrix = glm::rotate(element.modelMatrix, glm::radians(90.0f), glm::vec3(0, 1, 0));
 			element.modelMatrix = glm::scale(element.modelMatrix, glm::vec3(buildingSize[0], buildingSize[1], buildingSize[2]));
 
@@ -261,10 +257,13 @@ void ChaosSceneDrawingProgram::Init()
 			element.sphereRadius = sqrt(buildingSize[0] * buildingSize[0] + buildingSize[1] * buildingSize[1]) * 30;
 
 			building.push_back(element);
+
+			if (z % 5 == 0)
+				paintingSlotPosition.push_back(glm::vec3(position.x, paintingYPos, position.z));
 		}
 	}
 
-	// Creating the building bottom walls
+	// Creating the building back walls
 	for (int y = 0; y < buildingDimension[1]; y++)
 	{
 		for (int x = 0; x < buildingDimension[0]; x++)
@@ -277,19 +276,15 @@ void ChaosSceneDrawingProgram::Init()
 
 			element.plane = &buildingPlane;
 
-			float positionX = buildingPosition[0] + (x * buildingSize[0]);
-			float positionY = buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1];
-			float positionZ = buildingPosition[2] - buildingSize[2];
-
 			glm::vec4 position = {
-				positionX,
-				positionY,
-				positionZ,
+				buildingPosition[0] + (x* buildingSize[0]),
+				buildingPosition[1] + (y* buildingSize[1]) + buildingSize[1],
+				buildingPosition[2] - buildingSize[2],
 				1.0f
 			};
 
 			element.modelMatrix = glm::mat4(1.0f);
-			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(buildingPosition[0] + (x * buildingSize[0]), buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1], buildingPosition[2] - buildingSize[2]));
+			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(position.x, position.y, position.z));
 			element.modelMatrix = glm::scale(element.modelMatrix, glm::vec3(buildingSize[0], buildingSize[1], buildingSize[2]));
 
 			element.worldPosition = element.modelMatrix * position;
@@ -300,7 +295,7 @@ void ChaosSceneDrawingProgram::Init()
 		}
 	}
 
-	// Creating the building top walls
+	// Creating the building front walls
 	for (int y = 0; y < buildingDimension[1]; y++)
 	{
 		for (int x = 0; x < buildingDimension[0]; x++)
@@ -313,19 +308,15 @@ void ChaosSceneDrawingProgram::Init()
 
 			element.plane = &buildingPlane;
 
-			float positionX = buildingPosition[0] + (x * buildingSize[0]);
-			float positionY = buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1];
-			float positionZ = buildingPosition[2] + buildingSize[2] * buildingDimension[2];
-
 			glm::vec4 position = {
-				positionX,
-				positionY,
-				positionZ,
+				buildingPosition[0] + (x* buildingSize[0]),
+				buildingPosition[1] + (y* buildingSize[1]) + buildingSize[1],
+				buildingPosition[2] + buildingSize[2] * buildingDimension[2],
 				1.0f
 			};
 
 			element.modelMatrix = glm::mat4(1.0f);
-			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(buildingPosition[0] + (x * buildingSize[0]), buildingPosition[1] + (y * buildingSize[1]) + buildingSize[1], buildingPosition[2] + buildingSize[2] * buildingDimension[2]));
+			element.modelMatrix = glm::translate(element.modelMatrix, glm::vec3(position.x, position.y, position.z));
 			element.modelMatrix = glm::scale(element.modelMatrix, glm::vec3(buildingSize[0], buildingSize[1], buildingSize[2]));
 
 			element.worldPosition = element.modelMatrix * position;
@@ -394,16 +385,19 @@ void ChaosSceneDrawingProgram::Draw()
 		}
 	}
 
+	int paintingPosIndex = 0;
+
 	glEnable(GL_DEPTH_TEST);
 	// left rendering
+	if(CheckFrustum(paintingSlotPosition[paintingPosIndex], paintingSize))
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		leftShader.Bind();
 		modelMatrix = glm::mat4(1.0f);
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(leftPosition[0] + gridPaintingSize, leftPosition[1] + gridPaintingSize, leftPosition[2] - (gridPaintingSize * 1.25)));
+		modelMatrix = glm::translate(modelMatrix, paintingSlotPosition[paintingPosIndex]);
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f), glm::vec3(0, 0, 1));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(leftScale[0], leftScale[1], leftScale[2]));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
+		modelMatrix = glm::scale(modelMatrix, gridPaintingScale);
 
 		leftShader.SetMat4("model", modelMatrix);
 		leftShader.SetMat4("projection", projection);
@@ -415,17 +409,21 @@ void ChaosSceneDrawingProgram::Draw()
 		leftShader.SetFloat("timeSinceStart", engine->GetTimeSinceInit());
 
 		gridPainting.Draw();
+		
 	}
 
+	paintingPosIndex++;
+
 	// right rendering
+	if (CheckFrustum(paintingSlotPosition[paintingPosIndex], paintingSize))
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		wallShader.Bind();
 		modelMatrix = glm::mat4(1.0f);
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(leftPosition[0] - gridPaintingSize * 0.72, leftPosition[1] + gridPaintingSize, leftPosition[2] - (gridPaintingSize * 0.57)));
+		modelMatrix = glm::translate(modelMatrix, paintingSlotPosition[paintingPosIndex]);
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(-45.0f), glm::vec3(0, 0, 1));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(leftScale[0], leftScale[1], leftScale[2]));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
+		modelMatrix = glm::scale(modelMatrix, gridPaintingScale);
 
 		wallShader.SetMat4("model", modelMatrix);
 		wallShader.SetMat4("projection", projection);
@@ -435,19 +433,23 @@ void ChaosSceneDrawingProgram::Draw()
 		wallShader.SetFloat("speed", wallSpeed);
 		wallShader.SetFloat("amount", wallAmount);
 		wallShader.SetFloat("height", wallHeight);
-		wallShader.SetFloat("timeSinceStart", engine->GetTimeSinceInit());
+		wallShader.SetFloat("timeSinceStart", wallTime);
 
 		gridPainting.Draw();
 	}
 
+	paintingPosIndex++;
+
 	// Top rendering
+	if (CheckFrustum(paintingSlotPosition[paintingPosIndex], paintingSize))
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		topShader.Bind();
 		modelMatrix = glm::mat4(1.0f);
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(leftPosition[0], leftPosition[1] + gridPaintingSize, leftPosition[2] - (gridPaintingSize * 1.25)));
+		modelMatrix = glm::translate(modelMatrix, paintingSlotPosition[paintingPosIndex]);
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(1, 0, 0));
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(leftScale[0], leftScale[1], leftScale[2]));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(90.0f), glm::vec3(0, 0, 1));
+		modelMatrix = glm::scale(modelMatrix, gridPaintingScale);
 
 		topShader.SetMat4("model", modelMatrix);
 		topShader.SetMat4("projection", projection);
@@ -464,6 +466,8 @@ void ChaosSceneDrawingProgram::Draw()
 
 		gridPainting.Draw();
 	}
+
+	paintingPosIndex++;
 }
 
 void ChaosSceneDrawingProgram::BuildFrustum(Camera& camera)
@@ -597,6 +601,7 @@ void ChaosSceneDrawingProgram::UpdateUi()
 	ImGui::SliderFloat("Camera far", &far, 15.0f, 1000.0f);
 	ImGui::SliderFloat("Camera near", &near, 0.0f, 15.0f);
 	ImGui::SliderFloat("Camera fov", &fov, 0.0f, 120.0f);
+	ImGui::SliderFloat("Wall time", &wallTime, 0.0f, 120.0f);
 }
 
 void ChaosSceneDrawingProgram::ProcessInput()

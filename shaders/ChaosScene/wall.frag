@@ -9,10 +9,10 @@ uniform vec3 viewPos;
 
 void main()
 {
-	//FragColor = vec4((vertexColor.xyz * sin(clamp(vertexPos.y, 0.1, 1.0))), 1);
+	FragColor = vec4((vertexColor.xyz * sin(clamp(vertexPos.y, 0.1, 1.0))), 1);
 	//vec4 color = vec4(1, 1, 1, 0) * clamp(sin(vertexPos.x * vertexPos.z + cos(vertexPos.x * vertexPos.z ) * 0.25), 0, 1);
 
-	vec4 color = vec4(1, 1, 1, 0) * clamp(sin(vertexPos.x * vertexPos.z + cos(vertexPos.x * vertexPos.z ) * 0.25), 0, 1);
-	FragColor = color;
+	//vec4 color = vec4(1, 1, 1, 0) * clamp(sin(vertexPos.x * vertexPos.z + cos(vertexPos.x * vertexPos.z ) * 0.25), 0, 1);
+	//FragColor = color;
 }
 
